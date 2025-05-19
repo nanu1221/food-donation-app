@@ -1,32 +1,38 @@
-const express = require('express');
-const mysql = require('mysql');
-const app = express();
-const PORT = 3000;
+import express from 'express';
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
 
-// Middleware to parse JSON
+dotenv.config();
+
+const app = express();
+const port = 3000;
+
+app.use(express.static('public'));
 app.use(express.json());
 
-// MySQL connection setup
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',        // your MySQL username
-  password: '',        // your MySQL password (empty by default)
-  database: 'food_donation' // replace with your DB name
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+app.get('/api/donations', async (req, res) => {
+  const { data, error } = await supabase.from('donations').select('*');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('MySQL connection error:', err);
-    return;
+app.post('/api/donations', async (req, res) => {
+  const { foodItem, quantity } = req.body;
+
+  if (!foodItem || !quantity) {
+    return res.status(400).json({ error: 'foodItem and quantity are required' });
   }
-  console.log('Connected to MySQL database.');
+
+  const { data, error } = await supabase
+    .from('donations')
+    .insert([{ food_item: foodItem, quantity }]);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json({ message: 'Donation received', data });
 });
 
-// Example route
-app.get('/', (req, res) => {
-  res.send('Food Donation App is running!');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
