@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate - Food Donation App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Food Donation App</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="donate.html">Donate</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Donate Food</h2>
+    <form id="donationForm">
+      <label for="foodItem">Food Item:</label>
+      <input type="text" id="foodItem" name="foodItem" required>
+      <label for="quantity">Quantity:</label>
+      <input type="number" id="quantity" name="quantity" required>
+      <button type="submit">Submit Donation</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Food Donation App</p>
+  </footer>
+
+  <script>
+    document.getElementById('donationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const foodItem = document.getElementById('foodItem').value;
+      const quantity = document.getElementById('quantity').value;
+
+      const response = await fetch('/api/donate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ foodItem, quantity })
+      });
+
+      if (response.ok) {
+        alert('Donation submitted successfully!');
+      } else {
+        alert('Failed to submit donation.');
+      }
+    });
+  </script>
+</body>
+</html>
